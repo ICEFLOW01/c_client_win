@@ -56,14 +56,15 @@ typedef struct HashNode_Struct//定义哈希数组类型；
     struct HashNode_Struct*pNext;
 }HashNode;
 
-typedef struct QR_head//定义请求包头；
-{
+#define QR_BODY_LEN 64
+
+typedef struct {//定义请求包头；
     int package_len;
     int package_id;
-}QR_HEAD;
+    char body[QR_BODY_LEN];
+}QR_PACK;
 
-typedef struct QA_head
-{
+typedef struct {
     int package_len;
     int package_id;
 }QA_HEAD;
