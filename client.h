@@ -4,6 +4,7 @@
 #include<assert.h>
 #include<string.h>
 #include <locale.h>
+//#include<sys/socket.h>
 #ifndef _MINGW_
 #include<event2/event.h>
 #include<event2/bufferevent.h>
@@ -58,7 +59,7 @@ typedef struct HashNode_Struct//定义哈希数组类型；
 
 #define QR_BODY_LEN 64
 
-typedef struct {//定义请求包头；
+typedef struct {//定义请求包；
     int package_len;
     int package_id;
     char body[QR_BODY_LEN];
@@ -67,14 +68,27 @@ typedef struct {//定义请求包头；
 typedef struct {
     int package_len;
     int package_id;
+}QR_HEAD;
+
+typedef struct {
+    int package_len;
+	int infor_num;
+    int package_id;
 }QA_HEAD;
 
+int main_loop();
 int tcp_init();
-void write_ser();
-void read_ser();
-int read_stdin(char*data, int len);
-void unpackage(char*buf);
+int read_input(char*, int);
+int read_stdin(char*, int);
+int build_package(char*, int);
+int write_ser(char*, int);
+int read_ser(char*, int);
+int unpackage(char*, int);
+int Socket_Create(int, int, int);
+int Socket_Write(int, char*, int);
+int Socket_Read(int, char*, int);
 int tcp_close();
+
 #ifndef _MINGW_
 int server_init();
 int tcp_init();
