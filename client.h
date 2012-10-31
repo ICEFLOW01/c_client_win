@@ -4,7 +4,6 @@
 #include<assert.h>
 #include<string.h>
 #include <locale.h>
-//#include<sys/socket.h>
 #ifndef _MINGW_
 #include<event2/event.h>
 #include<event2/bufferevent.h>
@@ -26,6 +25,10 @@
 #define TCP_MAX 60000//设定最大的连接数；
 #define LISTEN_PORT 5000
 #define LISTEN_BACKLOG 32
+#define QR_PACK_LEN sizeof(QR_PACK)
+#define QR_ID       10
+#define MAX_LEN 4097	// 返回包最大是4096
+#define TERMINAL_PRINT printf
 
 typedef struct client_mes_struct
 {
