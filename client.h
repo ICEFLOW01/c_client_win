@@ -4,7 +4,10 @@
 #include<assert.h>
 #include<string.h>
 #include <locale.h>
-#ifndef _MINGW_
+
+#ifdef _MINGW_
+#include <windows.h>
+#else
 #include<event2/event.h>
 #include<event2/bufferevent.h>
 #include<mysql/mysql.h>
@@ -16,9 +19,6 @@
 #include<sys/types.h>
 #include<unistd.h>
 #include<fcntl.h>
-#else
-#include <windows.h>
-
 #endif
 
 #define HASH_TABLE_MAX_SIZE 10000//哈希数组大小；
@@ -29,6 +29,7 @@
 #define QR_ID       10
 #define MAX_LEN 4097	// 返回包最大是4096
 #define TERMINAL_PRINT printf
+#define QR_BODY_LEN 64
 
 typedef struct client_mes_struct
 {
@@ -60,8 +61,6 @@ typedef struct HashNode_Struct//定义哈希数组类型；
     struct HashNode_Struct*pNext;
 }HashNode;
 
-#define QR_BODY_LEN 64
-
 typedef struct {//定义请求包；
     int package_len;
     int package_id;
@@ -91,23 +90,3 @@ int Socket_Create(int, int, int);
 int Socket_Write(int, char*, int);
 int Socket_Read(int, char*, int);
 int tcp_close();
-
-#ifndef _MINGW_
-int server_init();
-int tcp_init();
-void do_accept(evutil_socket_t listener, short event, void *arg);
-void read_cb(int fd, short event, void*arg);
-int judgment_existence(int fd);
-int data_processing(int fd, char*line, int len, void*arg);
-int exception_handling(int fd, char*buf, int len, void*arg);
-int write_mes(int fd, char*buf, QA_HEAD qa_head, void*arg);
-void write_cb(int fd, short event, void*arg);
-#endif
-void hash_table_init();
-unsigned int hash_table_hash_str(const char*skey);
-void hash_table_release();
-int update_hash_table();
-int init_hash_table();
-void display_header();
-void hash_table_insert(const char* skey, INFOR* nvalue);
-HashNode** hash_table_lookup(char* skey);

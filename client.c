@@ -29,36 +29,31 @@ int port;
 int tcp_close()
 {
 	int ret = -1;
-	 
-#ifndef _MINGW_
-	ret = shutdown(sockfd, SHUT_RDWR );
-	if(ret < 0)
-	{
-		TERMINAL_PRINT("shutdown error\n");
-		return -1;
-	}
-	ret = close(sockfd);
-	if(ret < 0)
-	{
-		TERMINAL_PRINT("close fd error\n");
-		return -2;
-	}
-#else
+
+#ifdef _MINGW_
 /*
 	ret = shutdown(sockfd, SHUT_RDWR );
-	if(ret < 0)
-	{
+	if(ret < 0){
 		printf("shutdown error\n");
 		return -1;
 	}
 */
 	ret = closesocket(sockfd);
-	if(ret < 0)
-	{
+	if(ret < 0){
 		TERMINAL_PRINT("close fd error\n");
 		return -2;
 	}
-
+#else
+	ret = shutdown(sockfd, SHUT_RDWR );
+	if(ret < 0){
+		TERMINAL_PRINT("shutdown error\n");
+		return -1;
+	}
+	ret = close(sockfd);
+	if(ret < 0){
+		TERMINAL_PRINT("close fd error\n");
+		return -2;
+	}
 #endif
 	return 0;
 }
@@ -73,10 +68,10 @@ int tcp_close()
 int Socket_Read(int nSock,char* pBuf,int nSize)
 {
 	int ret;
-#ifndef _MINGW_        
-	ret = read(nSock,pBuf,nSize);
-#else
+#ifdef _MINGW_        
 	ret = recv(nSock,pBuf,nSize,0);
+#else
+	ret = read(nSock,pBuf,nSize);
 #endif
 	return ret;
 }
@@ -90,10 +85,10 @@ int Socket_Read(int nSock,char* pBuf,int nSize)
 int Socket_Write(int nSock,char* pBuf,int nSize)
 {
 	int ret;
-#ifndef _MINGW_        
-	ret = write(nSock,pBuf,nSize);
-#else
+#ifdef _MINGW_        
 	ret = send(nSock,pBuf,nSize,0);
+#else
+	ret = write(nSock,pBuf,nSize);
 #endif 
 	return ret;
 }
@@ -115,9 +110,8 @@ int Socket_Create(int af,int type,int protocol)
 
 	sock=socket(af,type,protocol);
 	if (sock == INVALID_SOCKET) return -1;
-#else
-
 	sock=socket(af,type,protocol);
+#else
 	if (sock == -1) return -1;
 #endif
 
@@ -137,14 +131,12 @@ int unpackage(char*buf, int len)//解析查询结果数据包；
 
 	// printf("\n******len %d\n******id %d\n", change_buf->package_len, change_buf->package_id);
 
-	if(head->package_id != 11)
-	{
+	if(head->package_id != 11){
 		TERMINAL_PRINT("package_id error\n");
 		return -1;
 	}
 
-	if(head->infor_num == 0)
-	{
+	if(head->infor_num == 0){
 		TERMINAL_PRINT("你要查询的信息不存在！\n");
 		return 0;
 	}
@@ -182,8 +174,7 @@ int read_ser(char* buf, int buf_len)//读数据的函数；
 	int len	= 0;
 	QA_HEAD*head = (QA_HEAD*) buf;
 
-	do
-	{
+	do{
 		ret = Socket_Read(sockfd, buf+len, buf_len - len - 1);
 		if( ret < 0 ) {
 			TERMINAL_PRINT("socket读错误\n");
@@ -197,10 +188,8 @@ int read_ser(char* buf, int buf_len)//读数据的函数；
 			TERMINAL_PRINT("socket返回包太长\n");
 			return -2;
 		}
-	}
-	while( ret != 0 );
-    if(len == 0)
-	{
+	}while( ret != 0 );
+    if(len == 0){
 		TERMINAL_PRINT("server end\n");
 		return -3;
 	}
@@ -227,12 +216,11 @@ int write_ser(char* buf, int buf_len)//写数据的函数；
 {   
 	int len = 0;
 	
-	if(buf == NULL)
-	{
+	if(buf == NULL){
 		TERMINAL_PRINT("write_ser buf is NULL\n");
 		return -1;		
 	}
-	if(buf_len != QR_BODY_LEN + sizeof(QR_HEAD)) {
+	if(buf_len != QR_BODY_LEN + sizeof(QR_HEAD)){
 		TERMINAL_PRINT("write_ser buf_len error\n");
 		return -2;
 	}
@@ -265,8 +253,7 @@ int write_ser(char* buf, int buf_len)//写数据的函数；
 */
 int	build_package(char* buf, int buf_len)
 {
-	if(buf == NULL)
-	{
+	if(buf == NULL){
 		TERMINAL_PRINT("build_package buf is NULL\n");
 		return -1;	
 	}
@@ -300,14 +287,12 @@ int read_stdin(char*data, int len)
 	fflush(stdin);
 	
 	ret = read(0, data, len-1);//从标准输入中读取数据；
-	if(ret < 0)
-	{   
+	if(ret < 0){   
 		TERMINAL_PRINT("read_stdin read error\n");
 		return ret;
 	}
 
-	if(strncmp(data, "quit", sizeof("quit")-1)==0)
-	{
+	if(strncmp(data, "quit", sizeof("quit")-1)==0){
 		TERMINAL_PRINT("quit 退出命令\n");
 		return 0;
 	}
@@ -327,8 +312,7 @@ int read_input(char* buf, int buf_size)
 {
 	int ret = -1;
 	ret = read_stdin(buf, buf_size);
-	if(ret < 0)
-	{
+	if(ret < 0){
 		return -1;
 	}
 
@@ -345,8 +329,7 @@ int tcp_init()
 	int ret = -1;
 
 	sockfd = Socket_Create(AF_INET, SOCK_STREAM, 0);
-	if (sockfd < -1)
-	{
+	if (sockfd < -1){
 		TERMINAL_PRINT("socket error\n");
 		return -1;
 	}	
@@ -359,8 +342,7 @@ int tcp_init()
 
 
 	ret = connect(sockfd, (struct sockaddr*)&seraddr, sizeof(seraddr));//连接；
-	if(ret < 0)
-	{
+	if(ret < 0){
 		TERMINAL_PRINT("connect error\n");
 		return -2;
 	}
@@ -379,54 +361,46 @@ int main_loop()
 	char w_buf[sizeof(QR_PACK)] = {0};
 	char r_buf[MAX_LEN]	= {0};
 
-	while(1)
-	{
+	while(1){
 		int len = 0 ;
 		int ret = -1 ;
 
 		ret = tcp_init();
-		if(ret < 0) {
+		if(ret < 0){
 			tcp_close();
 			return -1;
 		}
 
 		ret = read_input(w_buf + sizeof(QR_HEAD), QR_BODY_LEN);
-		if(ret < 0)
-		{
+		if(ret < 0){
 			return -2;	
 		}
-		if(ret == 0)
-		{
+		if(ret == 0){
 			return 0;
 		}
 		
 		ret = build_package(w_buf, sizeof(w_buf));
-		if(ret < 0)
-		{
+		if(ret < 0){
 			return -3;
 		}
 
 		ret = write_ser(w_buf, sizeof(w_buf));
-		if(ret < 0)
-		{
+		if(ret < 0){
 			return -4;
 		}
 
 		len = read_ser(r_buf, sizeof(r_buf));
-		if(len < 0)
-		{
+		if(len < 0){
 			return -5;
 		}
 
 		ret = unpackage(r_buf, len);	
-		if(ret < 0)
-		{
+		if(ret < 0){
 			return -6;	
 		}			
 			
 		ret = tcp_close();
-		if(ret < 0)
-		{
+		if(ret < 0){
 			return -7;
 		}
 
@@ -447,8 +421,7 @@ int main(int argc, char* argv[])
 {
 	int ret = -1;
 
-	if(argc<3)
-	{
+	if(argc<3){
 		printf("Usage:%s option\n",argv[0]);
 		printf("for example:%s ip port \n",argv[0]);
 		return 0;
@@ -457,12 +430,10 @@ int main(int argc, char* argv[])
 	sscanf(argv[2], "%d", &port);
 	
 	ret = main_loop();
-	if(ret < 0)
-	{
+	if(ret < 0){
 		return -1;
 	}
-	if(ret == 0)
-	{
+	if(ret == 0){
 		return 0;
 	}
 
